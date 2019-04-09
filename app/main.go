@@ -12,5 +12,6 @@ func main() {
 	})
 	addr := ":80"
 	fmt.Println("Example app listening on port ", addr)
+	fmt.Println("Hello, Elora Thea-Jan Green! ")
 	log.Fatal(http.ListenAndServe(addr, nil))
 }
