@@ -1,13 +1,18 @@
-FROM balenalib/%%BALENA_MACHINE_NAME%%-golang:latest-build AS build
+FROM resin/%%RESIN_MACHINE_NAME%%-openjdk:latest
 
-WORKDIR /go/src/github.com/balena-io-projects/app
+WORKDIR /usr/src/app
 
-COPY /app ./
+# Copies the package.json first for better cache on later pushes
+COPY package.json package.json
 
-RUN go build
+# This install npm dependencies on the resin.io build server,
+# making sure to clean up the artifacts it creates in order to reduce the image size.
+RUN JOBS=MAX npm install --production --unsafe-perm && npm cache clean && rm -rf /tmp/*
 
-FROM balenalib/%%BALENA_MACHINE_NAME%%-debian:stretch
+# This will copy all files in our root to the working directory in the container
+COPY . .
 
-COPY --from=build /go/src/github.com/balena-io-projects/app/ .
+# Enable systemd init system in container
+ENV INITSYSTEM=on
 
-CMD ./app
+CMD ["java", "-cp", ".", "Hello"]
